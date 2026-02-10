@@ -19,6 +19,8 @@ app.use(cors());
 
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/career", require("./routes/careerRoutes"));
+app.use("/api/resources", require("./routes/resourceRoutes"));
+app.use("/api/user", require("./routes/userRoutes"));
 
 // --- Define Routes BEFORE starting server ---
 app.get("/", (req, res) => {

@@ -119,7 +119,7 @@ export const getDetailedCareerPlan = async (
     2. Return only the market salary range for [Role] in India strictly in the format: ₹XXL - ₹XXL PA
     3. Identify critical missing skills.
     4. Create a learning roadmap specifically designed as a "bridge" to teach the *missing* skills required for this role. Do not include basic steps for skills the user already possesses.
-    5. Provide learning resources specifically for these missing skills.
+    5. Provide learning resources specifically for these missing skills. Focus on stable, high-authority domains such as MDN Web Docs, official documentation, Coursera, Udemy (well-known courses), freeCodeCamp, roadmap.sh, and major technical blogs. Avoid hallucinating URLs or using niche/personal blog links that might expire.
   `;
 
   const response = await ai.models.generateContent({
@@ -177,5 +177,59 @@ export const getDetailedCareerPlan = async (
   } catch (e) {
     console.error("Failed to parse details JSON", e);
     return { roadmap: [], resources: [], roleOverview: [], salaryRange: "" };
+  }
+};
+
+export const searchByRole = async (role: string): Promise<CareerPath[]> => {
+  const prompt = `
+    The user is searching for the job role: "${role}".
+    Provide 4 highly relevant career path variations related to this role.
+    For each career:
+    - Return a unique 'id' (short string).
+    - Return a 'title' for the role (e.g., if search is 'Frontend', return 'Junior Frontend Developer', 'React Specialist', etc.).
+    - Ensure 'description' is a single, concise, punchy sentence.
+    - Set 'matchPercentage' to 100 since this is a direct search.
+    - Return only the market salary range for [Role] in India strictly in the format: ₹XXL - ₹XXL PA
+    - List 5-7 key 'requiredSkills'.
+  `;
+
+  const response = await ai.models.generateContent({
+    model: "gemini-2.5-flash",
+    contents: prompt,
+    config: {
+      responseMimeType: "application/json",
+      responseSchema: {
+        type: Type.OBJECT,
+        properties: {
+          careers: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                id: { type: Type.STRING },
+                title: { type: Type.STRING },
+                description: { type: Type.STRING },
+                matchPercentage: { type: Type.NUMBER },
+                requiredSkills: {
+                  type: Type.ARRAY,
+                  items: { type: Type.STRING },
+                },
+                salaryRange: { type: Type.STRING },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  const text = response.text;
+  if (!text) return [];
+  try {
+    const json = JSON.parse(text);
+    return json.careers || [];
+  } catch (e) {
+    console.error("Failed to parse search JSON", e);
+    return [];
   }
 };

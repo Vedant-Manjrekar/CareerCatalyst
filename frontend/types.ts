@@ -8,6 +8,7 @@ export interface Resource {
   url: string;
   type: "Video" | "Article" | "Course";
   duration?: string;
+  tags?: string[];
   id?: string;
 }
 
@@ -36,6 +37,9 @@ export interface UserProfile {
   savedCareers: CareerPath[];
   mySkills: string[];
   completedResources: string[];
+  savedResources?: Resource[];
+  isApproved?: boolean;
+  role?: "admin" | "user";
 }
 
 export interface AdminUser {
@@ -46,6 +50,7 @@ export interface AdminUser {
   joinDate: string;
   skillsCount: number;
   savedPathsCount: number;
+  isApproved: boolean;
 }
 
 export enum AppStatus {

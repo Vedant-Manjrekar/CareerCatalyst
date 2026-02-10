@@ -14,6 +14,7 @@ import { Chatbot } from "./pages/Chatbot";
 import { Login } from "./pages/Login";
 import { Signup } from "./pages/Signup";
 import { AdminPanel } from "./pages/AdminPanel";
+import { CareerFinderDirect } from "./pages/CareerFinderDirect";
 
 function App() {
   return (
@@ -25,8 +26,10 @@ function App() {
             <Route path='/finder' element={<CareerFinder />} />
             <Route path='/finder/manual' element={<CareerFinderManual />} />
             <Route path='/finder/resume' element={<CareerFinderResume />} />
+            <Route path='/finder/direct' element={<CareerFinderDirect />} />
             <Route path='/finder/results' element={<CareerResults />} />
             <Route path='/career/:id' element={<CareerDetails />} />
+            <Route path='/saved-career/:id' element={<CareerDetails />} />
             <Route path='/profile' element={<Profile />} />
             <Route path='/saved-careers' element={<SavedCareers />} />
             <Route path='/chat' element={<Chatbot />} />

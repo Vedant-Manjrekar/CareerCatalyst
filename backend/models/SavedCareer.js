@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 // Roadmap Step Schema
 const roadmapStepSchema = new mongoose.Schema({
-  duration: { type: String, required: true },
+  duration: { type: String, required: false },
   title: { type: String, required: true },
   description: { type: String, required: true },
 });
@@ -12,7 +12,7 @@ const resourceSchema = new mongoose.Schema({
   type: { type: String, required: true }, // e.g. Online Course, Article
   title: { type: String, required: true },
   url: { type: String, required: true },
-  duration: { type: String, required: true },
+  duration: { type: String, required: false },
 });
 
 // Saved Career Schema
@@ -40,32 +40,37 @@ const savedCareerSchema = new mongoose.Schema({
 
   matchPercentage: {
     type: Number,
-    required: true,
+    required: false,
   },
 
   roleOverview: {
     type: [String],
-    required: true,
+    required: false,
+    default: [],
   },
 
   salaryRange: {
     type: String,
-    required: true,
+    required: false,
+    default: "Competitive",
   },
 
   requiredSkills: {
     type: [String],
-    required: true,
+    required: false,
+    default: [],
   },
 
   roadmap: {
     type: [roadmapStepSchema],
-    required: true,
+    required: false,
+    default: [],
   },
 
   resources: {
     type: [resourceSchema],
-    required: true,
+    required: false,
+    default: [],
   },
 
   createdAt: {

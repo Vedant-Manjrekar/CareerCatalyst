@@ -30,8 +30,15 @@ export const CareerDetails: React.FC = () => {
   const { id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
-  const { userProfile, toggleResourceCompletion, saveCareer, removeCareer } =
-    useApp();
+  const {
+    userProfile,
+    toggleResourceCompletion,
+    saveCareer,
+    removeCareer,
+    globalResources,
+    saveResource,
+    removeResource,
+  } = useApp();
 
   const initialCareer =
     location.state?.career || userProfile.savedCareers.find((c) => c.id === id);
@@ -41,8 +48,12 @@ export const CareerDetails: React.FC = () => {
   );
   const [loading, setLoading] = useState(!initialCareer?.roadmap);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
-  const [isSaved, setIsSaved] = useState(false);
+  const [isSaved, setIsSaved] = useState(
+    userProfile.savedCareers.some((c) => c.id === id)
+  );
   const contentRef = useRef<HTMLDivElement>(null);
+
+  const [validationStatuses, setValidationStatuses] = useState<Record<string, 'valid' | 'invalid' | 'checking'>>({});
 
   useEffect(() => {
     if (!career) {
@@ -50,13 +61,52 @@ export const CareerDetails: React.FC = () => {
       return;
     }
 
+    const validateLinks = async (urls: string[]) => {
+      urls.forEach(async (url) => {
+        setValidationStatuses(prev => ({ ...prev, [url]: 'checking' }));
+        try {
+          const res = await fetch("http://localhost:8000/api/resources/validate-link", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ url })
+          });
+          const data = await res.json();
+          setValidationStatuses(prev => ({ 
+            ...prev, 
+            [url]: data.isValid ? 'valid' : 'invalid' 
+          }));
+        } catch {
+          setValidationStatuses(prev => ({ ...prev, [url]: 'invalid' }));
+        }
+      });
+    };
+
     const fetchDetails = async () => {
       try {
         const details = await getDetailedCareerPlan(
           career.title,
           userProfile.mySkills
         );
-        setCareer((prev) => (prev ? { ...prev, ...details } : null));
+        
+        // --- HYBRID RESOURCE BLENDING ---
+        let blendedResources = details.resources || [];
+        
+        if (details.roadmap && details.roadmap.length > 0 && globalResources.length > 0) {
+          const missing = details.roadmap.map(s => s.title.toLowerCase());
+          const vetted = globalResources.filter((gr: any) => 
+            gr.tags?.some((t: string) => missing.some(m => m.includes(t.toLowerCase()))) ||
+            missing.some(m => gr.title.toLowerCase().includes(m))
+          );
+
+          blendedResources = [...vetted, ...(details.resources || [])].filter(
+            (v, i, a) => a.findIndex(t => t.url === v.url) === i
+          );
+        }
+
+        setCareer((prev) => (prev ? { ...prev, ...details, resources: blendedResources } : null));
+        if (blendedResources.length > 0) {
+          validateLinks(blendedResources.map(r => r.url));
+        }
       } catch (err) {
         console.error("Failed to fetch details", err);
       } finally {
@@ -68,6 +118,7 @@ export const CareerDetails: React.FC = () => {
       fetchDetails();
     } else {
       setLoading(false);
+      validateLinks(career.resources.map(r => r.url));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
@@ -244,9 +295,12 @@ export const CareerDetails: React.FC = () => {
                 <div className='flex flex-wrap items-center gap-4 mt-2'>
                   {/* Pop Salary Badge */}
                   <div className='flex items-center bg-gradient-to-r from-emerald-500 to-teal-600 text-white px-4 py-1.5 rounded-full shadow-lg shadow-emerald-500/20 text-sm font-bold'>
-                    <span className='mr-1'>₹</span>
                     {career.salaryRange
-                      ? career.salaryRange.replace("₹", "$")
+                      ? (() => {
+                          // Extract clean salary range (e.g., "₹8L - ₹15L PA" from verbose text)
+                          const match = career.salaryRange.match(/₹[\d.]+[LKlk]?\s*-\s*₹[\d.]+[LKlk]?(\s*PA)?/i);
+                          return match ? match[0] : career.salaryRange.substring(0, 25);
+                        })()
                       : "Competitive"}
                   </div>
 
@@ -475,7 +529,21 @@ export const CareerDetails: React.FC = () => {
                 </h3>
               </div>
               <div className='p-4 space-y-3'>
-                {career.resources?.map((res: Resource, idx: number) => {
+                {!career.resources || career.resources.length === 0 ? (
+                  <div className='text-center py-8 text-slate-500 dark:text-slate-400'>
+                    <PlayCircle size={32} className='mx-auto mb-2 opacity-50' />
+                    <p className='text-sm'>No resources available yet. They'll appear once the roadmap is generated.</p>
+                  </div>
+                ) : [...career.resources]
+                  .sort((a, b) => {
+                    // Sort: valid/checking first, invalid last
+                    const statusA = validationStatuses[a.url] || 'checking';
+                    const statusB = validationStatuses[b.url] || 'checking';
+                    if (statusA === 'invalid' && statusB !== 'invalid') return 1;
+                    if (statusA !== 'invalid' && statusB === 'invalid') return -1;
+                    return 0;
+                  })
+                  .map((res: Resource, idx: number) => {
                   const isCompleted = userProfile.completedResources.includes(
                     res.url
                   );
@@ -497,25 +565,53 @@ export const CareerDetails: React.FC = () => {
                           {getResourceIcon(res.type)}
                           {res.type}
                         </span>
-                        <button
-                          onClick={() => toggleResourceCompletion(res.url)}
-                          className={`transition-colors p-1 rounded-full hover:bg-black/5 dark:hover:bg-white/10 ${
-                            isCompleted
-                              ? "text-green-600 dark:text-green-400"
-                              : "text-slate-400 hover:text-green-500"
-                          }`}
-                          title={
-                            isCompleted
-                              ? "Mark as incomplete"
-                              : "Mark as complete"
-                          }
-                          id='pdf-ignore'
-                        >
-                          <CheckCircle
-                            size={18}
-                            className={isCompleted ? "fill-current" : ""}
-                          />
-                        </button>
+                        <div className='flex items-center gap-1'>
+                          <button
+                            onClick={() => {
+                              const isSaved = userProfile.savedResources?.some(r => r.url === res.url);
+                              if (isSaved) {
+                                removeResource(res.url);
+                              } else {
+                                saveResource(res);
+                              }
+                            }}
+                            className={`transition-colors p-1 rounded-full hover:bg-black/5 dark:hover:bg-white/10 ${
+                              userProfile.savedResources?.some(r => r.url === res.url)
+                                ? "text-brand-600 dark:text-brand-400"
+                                : "text-slate-400 hover:text-brand-500"
+                            }`}
+                            title={
+                              userProfile.savedResources?.some(r => r.url === res.url)
+                                ? "Remove from saved"
+                                : "Save resource"
+                            }
+                            id='pdf-ignore'
+                          >
+                            <Bookmark
+                              size={18}
+                              className={userProfile.savedResources?.some(r => r.url === res.url) ? "fill-current" : ""}
+                            />
+                          </button>
+                          <button
+                            onClick={() => toggleResourceCompletion(res.url)}
+                            className={`transition-colors p-1 rounded-full hover:bg-black/5 dark:hover:bg-white/10 ${
+                              isCompleted
+                                ? "text-green-600 dark:text-green-400"
+                                : "text-slate-400 hover:text-green-500"
+                            }`}
+                            title={
+                              isCompleted
+                                ? "Mark as incomplete"
+                                : "Mark as complete"
+                            }
+                            id='pdf-ignore'
+                          >
+                            <CheckCircle
+                              size={18}
+                              className={isCompleted ? "fill-current" : ""}
+                            />
+                          </button>
+                        </div>
                       </div>
                       <h4
                         className={`font-semibold text-sm mt-2 mb-1 line-clamp-2 ${
@@ -538,6 +634,28 @@ export const CareerDetails: React.FC = () => {
                         >
                           Open <ExternalLink size={10} className='ml-1' />
                         </a>
+
+                        {/* Validation Badge */}
+                        <div className='flex items-center gap-1.5'>
+                          {validationStatuses[res.url] === 'checking' && (
+                            <div className='flex items-center gap-1 text-[9px] text-slate-400 font-bold uppercase'>
+                              <Loader2 size={10} className='animate-spin' />
+                              Verifying
+                            </div>
+                          )}
+                          {validationStatuses[res.url] === 'valid' && (
+                            <div className='flex items-center gap-1 text-[9px] text-emerald-600 dark:text-emerald-400 font-bold uppercase py-0.5 px-1.5 bg-emerald-50 dark:bg-emerald-900/20 rounded-md border border-emerald-100 dark:border-emerald-800/40'>
+                              <CheckCircle size={10} />
+                              Verified
+                            </div>
+                          )}
+                          {validationStatuses[res.url] === 'invalid' && (
+                            <div className='flex items-center gap-1 text-[9px] text-red-600 dark:text-red-400 font-bold uppercase py-0.5 px-1.5 bg-red-50 dark:bg-red-900/20 rounded-md border border-red-100 dark:border-red-800/40'>
+                              <AlertCircle size={10} />
+                              Unavailable
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                   );

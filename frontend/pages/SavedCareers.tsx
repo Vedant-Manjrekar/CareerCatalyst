@@ -130,7 +130,7 @@ export const SavedCareers: React.FC = () => {
                     : "Saved Path"}
                 </span>
                 <Link
-                  to={`/saved-career/${career.id}`}
+                  to={`/career/${career.id}`}
                   className='text-brand-600 dark:text-brand-400 font-medium text-sm flex items-center hover:text-brand-800 dark:hover:text-brand-300 group-hover:translate-x-1 transition-transform'
                 >
                   View Plan <ArrowRight size={16} className='ml-1' />

@@ -33,6 +33,7 @@ exports.signup = async (req, res, next) => {
       savedPathCount,
       avatar_no,
       skills,
+      isApproved: role === "admin" ? false : true,
     });
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
@@ -73,6 +74,8 @@ exports.login = async (req, res) => {
         name: user.name,
         email: user.email,
         avatar_no: user.avatar_no,
+        role: user.role,
+        isApproved: user.isApproved,
       },
     });
   } catch (err) {

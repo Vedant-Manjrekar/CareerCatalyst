@@ -18,26 +18,30 @@ router.post("/save", auth, async (req, res) => {
       resources,
     } = req.body;
 
-    if (!id || !title || !description || !requiredSkills || !roadmap) {
+    if (!id || !title || !description) {
       return res.status(400).json({
         success: false,
-        message: "Missing required fields",
+        message: "Missing required fields: id, title, and description are required.",
       });
     }
 
-    const saved = await SavedCareer.create({
-      userId: req.user,
-      id,
-      title,
-      matchPercentage,
-      description,
-      roleOverview,
-      salaryRange,
-      requiredSkills,
-      missingSkills,
-      roadmap,
-      resources,
-    });
+    const saved = await SavedCareer.findOneAndUpdate(
+      { userId: req.user, id: id },
+      {
+        userId: req.user,
+        id,
+        title,
+        matchPercentage,
+        description,
+        roleOverview,
+        salaryRange,
+        requiredSkills,
+        missingSkills,
+        roadmap,
+        resources,
+      },
+      { upsert: true, new: true, runValidators: true }
+    );
 
     res.json({ success: true, saved });
   } catch (err) {
