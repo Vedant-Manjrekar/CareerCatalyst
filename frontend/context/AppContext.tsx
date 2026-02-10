@@ -120,6 +120,7 @@ export const AppProvider = ({ children }: { children?: ReactNode }) => {
             mySkills: userData.data.skills || [],
             savedCareers: [],
             completedResources: userProfile.completedResources,
+            savedResources: userData.data.savedResources || [],
             isApproved: userData.data.isApproved,
             role: userData.data.role,
           };
