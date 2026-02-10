@@ -7,6 +7,8 @@ import {
   ArrowRight,
   CheckCircle2,
   ArrowLeft,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { useApp } from "../context/AppContext";
 
@@ -19,6 +21,7 @@ export const Login: React.FC = () => {
   const [error, setError] = useState("");
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [resetSent, setResetSent] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -184,7 +187,7 @@ export const Login: React.FC = () => {
                 Email address
               </label>
               <div className='relative'>
-                <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
+                <div className='absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10'>
                   <Mail className='h-5 w-5 text-slate-400' />
                 </div>
                 <input
@@ -195,7 +198,7 @@ export const Login: React.FC = () => {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className='appearance-none relative block w-full pl-10 px-3 py-3 border border-slate-300 dark:border-slate-700 placeholder-slate-500 text-slate-900 dark:text-white dark:bg-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500'
+                  className='appearance-none relative block w-full pl-12 px-3 py-3 border border-slate-300 dark:border-slate-700 placeholder-slate-500 text-slate-900 dark:text-white dark:bg-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500'
                   placeholder='Email address'
                 />
               </div>
@@ -206,20 +209,27 @@ export const Login: React.FC = () => {
                 Password
               </label>
               <div className='relative'>
-                <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
+                <div className='absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10'>
                   <Lock className='h-5 w-5 text-slate-400' />
                 </div>
                 <input
                   id='password'
                   name='password'
-                  type='password'
+                  type={showPassword ? 'text' : 'password'}
                   autoComplete='current-password'
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className='appearance-none relative block w-full pl-10 px-3 py-3 border border-slate-300 dark:border-slate-700 placeholder-slate-500 text-slate-900 dark:text-white dark:bg-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500'
+                  className='appearance-none relative block w-full pl-12 pr-10 px-3 py-3 border border-slate-300 dark:border-slate-700 placeholder-slate-500 text-slate-900 dark:text-white dark:bg-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500'
                   placeholder='Password'
                 />
+                <button
+                  type='button'
+                  onClick={() => setShowPassword(!showPassword)}
+                  className='absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 z-10'
+                >
+                  {showPassword ? <EyeOff className='h-5 w-5' /> : <Eye className='h-5 w-5' />}
+                </button>
               </div>
             </div>
           </div>
