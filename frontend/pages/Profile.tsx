@@ -4,7 +4,7 @@ import { Bookmark, Award, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export const Profile: React.FC = () => {
-  const { userProfile } = useApp();
+  const { userProfile, recordResourceView } = useApp();
   const [careerData, setCareerData] = useState();
   const userName = localStorage.getItem("user_name");
   const avatar_seed = localStorage.getItem("avatar_no");
@@ -142,6 +142,7 @@ export const Profile: React.FC = () => {
                   href={resource.url}
                   target='_blank'
                   rel='noopener noreferrer'
+                  onClick={() => recordResourceView(resource.url)}
                   className='block p-3 bg-slate-50 dark:bg-slate-800 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors border border-slate-200 dark:border-slate-700'
                 >
                   <div className='flex items-start justify-between gap-2'>

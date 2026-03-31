@@ -32,7 +32,8 @@ interface AppContextType {
   toggleAdminRole: (id: string) => void;
   globalResources: Resource[];
   addGlobalResource: (resource: Omit<Resource, "id">) => void;
-  deleteGlobalResource: (id: string) => void;
+  deleteGlobalResource: (id: string) => Promise<void>;
+  recordResourceView: (url: string) => Promise<void>;
 }
 
 const defaultProfile: UserProfile = {
@@ -127,36 +128,50 @@ export const AppProvider = ({ children }: { children?: ReactNode }) => {
 
           const isReallyAdmin = profile.role === "admin" && profile.isApproved;
           setIsAdmin(isReallyAdmin);
-          localStorage.setItem("career_catalyst_is_admin", isReallyAdmin ? "true" : "false");
-          const careerRes = await fetch("http://localhost:8000/api/career/my-saved", {
-            headers: { Authorization: `Bearer ${token}` },
-          });
+          localStorage.setItem(
+            "career_catalyst_is_admin",
+            isReallyAdmin ? "true" : "false",
+          );
+          const careerRes = await fetch(
+            "http://localhost:8000/api/career/my-saved",
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            },
+          );
           const careerData = await careerRes.json();
           if (careerData.success) {
             profile.savedCareers = careerData.data.map((c: any) => ({
               ...c,
-              id: c.id || c._id // Ensure we have the frontend 'id'
+              id: c.id || c._id, // Ensure we have the frontend 'id'
             }));
           }
-          
+
           setUserProfile(profile);
-          localStorage.setItem("career_catalyst_profile", JSON.stringify(profile));
+          localStorage.setItem(
+            "career_catalyst_profile",
+            JSON.stringify(profile),
+          );
 
           // Fetch All Users if Admin
           if (isAdmin || userData.data.role === "admin") {
             const allUsersRes = await fetch("http://localhost:8000/users");
             const allUsersData = await allUsersRes.json();
             if (Array.isArray(allUsersData.data)) {
-               setAllUsers(allUsersData.data.map((u: any) => ({
-                 id: u._id,
-                 name: u.name,
-                 email: u.email,
-                 role: u.role || "user",
-                 joinDate: u.joining_date,
-                 skillsCount: u.skills?.length || 0,
-                 savedPathsCount: u.savedPathCount || 0,
-                 isApproved: u.isApproved,
-               })));
+              setAllUsers(
+                allUsersData.data.map((u: any) => ({
+                  id: u._id,
+                  name: u.name,
+                  email: u.email,
+                  role: u.role || "user",
+                  joinDate: u.joining_date,
+                  skills: u.skills || [],
+                  skillsCount: (u.skills || []).length,
+                  savedPathsCount: u.savedPathCount || 0,
+                  isApproved: u.isApproved,
+                  lastActive: u.lastActive,
+                  avatar_no: u.avatar_no || u.id || u.email,
+                })),
+              );
             }
           }
         }
@@ -175,12 +190,13 @@ export const AppProvider = ({ children }: { children?: ReactNode }) => {
     if (isAuthenticated) {
       fetchData();
     } else {
-       // Fetch Resources even if not logged in
-       fetch("http://localhost:8000/api/resources")
-         .then(res => res.json())
-         .then(data => {
-           if (data.success) setGlobalResources(data.data);
-         }).catch(console.error);
+      // Fetch Resources even if not logged in
+      fetch("http://localhost:8000/api/resources")
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success) setGlobalResources(data.data);
+        })
+        .catch(console.error);
     }
   }, [isAuthenticated, isAdmin]);
 
@@ -196,7 +212,7 @@ export const AppProvider = ({ children }: { children?: ReactNode }) => {
   const setSearchResults = (results: CareerPath[]) => {
     sessionStorage.setItem(
       "career_catalyst_search_results",
-      JSON.stringify(results)
+      JSON.stringify(results),
     );
     setSearchResultsState(results);
   };
@@ -227,7 +243,7 @@ export const AppProvider = ({ children }: { children?: ReactNode }) => {
 
   const saveCareer = async (career: CareerPath) => {
     if (userProfile.savedCareers.some((c) => c.id === career.id)) return;
-    
+
     const token = localStorage.getItem("token");
     if (token) {
       try {
@@ -243,7 +259,7 @@ export const AppProvider = ({ children }: { children?: ReactNode }) => {
         console.error("Failed to save career to DB:", err);
       }
     }
-    
+
     saveToLocal({
       ...userProfile,
       savedCareers: [...userProfile.savedCareers, career],
@@ -252,11 +268,13 @@ export const AppProvider = ({ children }: { children?: ReactNode }) => {
 
   const removeCareer = async (careerId: string) => {
     const token = localStorage.getItem("token");
-    const careerToRemove = userProfile.savedCareers.find(c => c.id === careerId);
-    
+    const careerToRemove = userProfile.savedCareers.find(
+      (c) => c.id === careerId,
+    );
+
     if (token && careerToRemove) {
       try {
-        // Note: backend uses _id for deletion in some routes, 
+        // Note: backend uses _id for deletion in some routes,
         // but careerRoutes uses findOneAndDelete with { _id: id, userId: req.user }
         // We need to ensure we have the MongoDB _id.
         const dbId = (careerToRemove as any)._id || careerToRemove.id;
@@ -288,14 +306,17 @@ export const AppProvider = ({ children }: { children?: ReactNode }) => {
     const token = localStorage.getItem("token");
     if (token) {
       try {
-        const res = await fetch("http://localhost:8000/api/user/resources/save", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
+        const res = await fetch(
+          "http://localhost:8000/api/user/resources/save",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(resource),
           },
-          body: JSON.stringify(resource),
-        });
+        );
         const data = await res.json();
         if (data.success) {
           saveToLocal({ ...userProfile, savedResources: data.data });
@@ -310,14 +331,17 @@ export const AppProvider = ({ children }: { children?: ReactNode }) => {
     const token = localStorage.getItem("token");
     if (token) {
       try {
-        const res = await fetch("http://localhost:8000/api/user/resources/remove", {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
+        const res = await fetch(
+          "http://localhost:8000/api/user/resources/remove",
+          {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ url }),
           },
-          body: JSON.stringify({ url }),
-        });
+        );
         const data = await res.json();
         if (data.success) {
           saveToLocal({ ...userProfile, savedResources: data.data });
@@ -336,7 +360,7 @@ export const AppProvider = ({ children }: { children?: ReactNode }) => {
     setIsAdmin(adminMode);
     localStorage.setItem(
       "career_catalyst_is_admin",
-      adminMode ? "true" : "false"
+      adminMode ? "true" : "false",
     );
   };
 
@@ -356,10 +380,10 @@ export const AppProvider = ({ children }: { children?: ReactNode }) => {
       });
       const data = await res.json();
       console.log("Approve response:", data);
-      
+
       if (data.success) {
         setAllUsers((prev) =>
-          prev.map((u) => (u.id === id ? { ...u, isApproved: true } : u))
+          prev.map((u) => (u.id === id ? { ...u, isApproved: true } : u)),
         );
       } else {
         alert("Failed to approve user: " + (data.message || "Unknown error"));
@@ -393,12 +417,32 @@ export const AppProvider = ({ children }: { children?: ReactNode }) => {
     }
   };
 
-  const toggleAdminRole = (id: string) => {
-    setAllUsers((prev) =>
-      prev.map((u) =>
-        u.id === id ? { ...u, role: u.role === "Admin" ? "User" : "Admin" } : u
-      )
-    );
+  const toggleAdminRole = async (id: string) => {
+    const userToToggle = allUsers.find((u) => u.id === id);
+    if (!userToToggle) return;
+
+    const newRole = userToToggle.role.toLowerCase() === "admin" ? "user" : "admin";
+
+    try {
+      const res = await fetch(`http://localhost:8000/users/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ role: newRole }),
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        setAllUsers((prev) =>
+          prev.map((u) =>
+            u.id === id ? { ...u, role: newRole } : u,
+          ),
+        );
+      }
+    } catch (err) {
+      console.error("Failed to toggle admin role:", err);
+    }
   };
 
   const addGlobalResource = async (resource: Omit<Resource, "id">) => {
@@ -423,15 +467,35 @@ export const AppProvider = ({ children }: { children?: ReactNode }) => {
   };
 
   const deleteGlobalResource = async (id: string) => {
-    const token = localStorage.getItem("token");
     try {
-      await fetch(`http://localhost:8000/api/resources/${id}`, {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`http://localhost:8000/api/resources/${id}`, {
         method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
-      setGlobalResources((prev) => prev.filter((r) => ((r as any)._id || r.id) !== id));
-    } catch (err) {
-      console.error("Failed to delete resource from DB:", err);
+      const data = await res.json();
+      if (data.success) {
+        setGlobalResources((prev) => prev.filter((r) => r.id !== id));
+      }
+    } catch (error) {
+      console.error("Error deleting global resource:", error);
+    }
+  };
+
+  const recordResourceView = async (url: string) => {
+    try {
+      await fetch("http://localhost:8000/api/resources/record-view", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url }),
+      });
+      setGlobalResources((prev) => 
+        prev.map(r => r.url === url ? { ...r, views: (r.views || 0) + 1 } : r)
+      );
+    } catch (error) {
+      console.error("Error recording view", error);
     }
   };
 
@@ -462,6 +526,7 @@ export const AppProvider = ({ children }: { children?: ReactNode }) => {
         globalResources,
         addGlobalResource,
         deleteGlobalResource,
+        recordResourceView,
       }}
     >
       {children}

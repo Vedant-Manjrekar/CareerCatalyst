@@ -35,9 +35,10 @@ export const CareerDetails: React.FC = () => {
     toggleResourceCompletion,
     saveCareer,
     removeCareer,
-    globalResources,
     saveResource,
     removeResource,
+    recordResourceView,
+    globalResources,
   } = useApp();
 
   const initialCareer =
@@ -630,6 +631,7 @@ export const CareerDetails: React.FC = () => {
                           href={res.url}
                           target='_blank'
                           rel='noopener noreferrer'
+                          onClick={() => recordResourceView(res.url)}
                           className='opacity-80 hover:opacity-100 flex items-center text-xs font-bold uppercase tracking-wide'
                         >
                           Open <ExternalLink size={10} className='ml-1' />

@@ -27,7 +27,7 @@ import html2canvas from "html2canvas";
 export const SavedCareer: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { userProfile, toggleResourceCompletion } = useApp();
+  const { userProfile, toggleResourceCompletion, recordResourceView } = useApp();
 
   const [careerData, setCareerData] = useState<any[] | null>(null);
   const [loading, setLoading] = useState(true);
@@ -441,6 +441,7 @@ export const SavedCareer: React.FC = () => {
                           href={res.url}
                           target='_blank'
                           rel='noreferrer'
+                          onClick={() => recordResourceView(res.url)}
                           className='flex items-center text-xs font-bold'
                         >
                           Open <ExternalLink size={10} className='ml-1' />

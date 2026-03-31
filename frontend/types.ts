@@ -10,6 +10,7 @@ export interface Resource {
   duration?: string;
   tags?: string[];
   id?: string;
+  views?: number;
 }
 
 export interface CareerPath {
@@ -46,11 +47,14 @@ export interface AdminUser {
   id: string;
   name: string;
   email: string;
-  role: "Admin" | "User";
+  role: "admin" | "user";
   joinDate: string;
+  skills?: string[];
   skillsCount: number;
   savedPathsCount: number;
   isApproved: boolean;
+  lastActive?: string;
+  avatar_no?: string;
 }
 
 export enum AppStatus {
