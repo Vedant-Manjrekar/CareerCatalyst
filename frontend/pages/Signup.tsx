@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Mail, Lock, User, UserPlus, ArrowRight, Eye, EyeOff } from "lucide-react";
 import { useApp } from "../context/AppContext";
+import { API_BASE_URL } from "../apiConfig";
 
 export const Signup: React.FC = () => {
   const navigate = useNavigate();
@@ -20,7 +21,7 @@ export const Signup: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const res = await fetch("http://localhost:8000/api/auth/signup", {
+      const res = await fetch(`${API_BASE_URL}/api/auth/signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

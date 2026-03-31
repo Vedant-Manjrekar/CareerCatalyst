@@ -6,6 +6,7 @@ import React, {
   ReactNode,
 } from "react";
 import { UserProfile, CareerPath, AdminUser, Resource } from "../types";
+import { API_BASE_URL } from "../apiConfig";
 
 interface AppContextType {
   userProfile: UserProfile;
@@ -110,7 +111,7 @@ export const AppProvider = ({ children }: { children?: ReactNode }) => {
 
       try {
         // Fetch User Profile
-        const userRes = await fetch("http://localhost:8000/api/user/profile", {
+        const userRes = await fetch(`${API_BASE_URL}/api/user/profile`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const userData = await userRes.json();
@@ -133,7 +134,7 @@ export const AppProvider = ({ children }: { children?: ReactNode }) => {
             isReallyAdmin ? "true" : "false",
           );
           const careerRes = await fetch(
-            "http://localhost:8000/api/career/my-saved",
+            `${API_BASE_URL}/api/career/my-saved`,
             {
               headers: { Authorization: `Bearer ${token}` },
             },
@@ -154,7 +155,7 @@ export const AppProvider = ({ children }: { children?: ReactNode }) => {
 
           // Fetch All Users if Admin
           if (isAdmin || userData.data.role === "admin") {
-            const allUsersRes = await fetch("http://localhost:8000/users");
+            const allUsersRes = await fetch(`${API_BASE_URL}/users`);
             const allUsersData = await allUsersRes.json();
             if (Array.isArray(allUsersData.data)) {
               setAllUsers(
@@ -177,7 +178,7 @@ export const AppProvider = ({ children }: { children?: ReactNode }) => {
         }
 
         // Fetch Global Resources
-        const resourceRes = await fetch("http://localhost:8000/api/resources");
+        const resourceRes = await fetch(`${API_BASE_URL}/api/resources`);
         const resourceData = await resourceRes.json();
         if (resourceData.success) {
           setGlobalResources(resourceData.data);
@@ -191,7 +192,7 @@ export const AppProvider = ({ children }: { children?: ReactNode }) => {
       fetchData();
     } else {
       // Fetch Resources even if not logged in
-      fetch("http://localhost:8000/api/resources")
+      fetch(`${API_BASE_URL}/api/resources`)
         .then((res) => res.json())
         .then((data) => {
           if (data.success) setGlobalResources(data.data);
@@ -226,7 +227,7 @@ export const AppProvider = ({ children }: { children?: ReactNode }) => {
     const token = localStorage.getItem("token");
     if (token) {
       try {
-        await fetch("http://localhost:8000/api/user/skills", {
+        await fetch(`${API_BASE_URL}/api/user/skills`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -247,7 +248,7 @@ export const AppProvider = ({ children }: { children?: ReactNode }) => {
     const token = localStorage.getItem("token");
     if (token) {
       try {
-        await fetch("http://localhost:8000/api/career/save", {
+        await fetch(`${API_BASE_URL}/api/career/save`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -278,7 +279,7 @@ export const AppProvider = ({ children }: { children?: ReactNode }) => {
         // but careerRoutes uses findOneAndDelete with { _id: id, userId: req.user }
         // We need to ensure we have the MongoDB _id.
         const dbId = (careerToRemove as any)._id || careerToRemove.id;
-        await fetch(`http://localhost:8000/api/career/remove/${dbId}`, {
+        await fetch(`${API_BASE_URL}/api/career/remove/${dbId}`, {
           method: "DELETE",
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -307,7 +308,7 @@ export const AppProvider = ({ children }: { children?: ReactNode }) => {
     if (token) {
       try {
         const res = await fetch(
-          "http://localhost:8000/api/user/resources/save",
+          `${API_BASE_URL}/api/user/resources/save`,
           {
             method: "POST",
             headers: {
@@ -332,7 +333,7 @@ export const AppProvider = ({ children }: { children?: ReactNode }) => {
     if (token) {
       try {
         const res = await fetch(
-          "http://localhost:8000/api/user/resources/remove",
+          `${API_BASE_URL}/api/user/resources/remove`,
           {
             method: "DELETE",
             headers: {
@@ -374,7 +375,7 @@ export const AppProvider = ({ children }: { children?: ReactNode }) => {
     const token = localStorage.getItem("token");
     console.log("Attempting to approve user with ID:", id);
     try {
-      const res = await fetch(`http://localhost:8000/api/user/approve/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/user/approve/${id}`, {
         method: "PATCH",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -408,7 +409,7 @@ export const AppProvider = ({ children }: { children?: ReactNode }) => {
   // Admin Actions
   const deleteUser = async (id: string) => {
     try {
-      await fetch(`http://localhost:8000/user/${id}`, {
+      await fetch(`${API_BASE_URL}/user/${id}`, {
         method: "DELETE",
       });
       setAllUsers((prev) => prev.filter((u) => u.id !== id));
@@ -424,7 +425,7 @@ export const AppProvider = ({ children }: { children?: ReactNode }) => {
     const newRole = userToToggle.role.toLowerCase() === "admin" ? "user" : "admin";
 
     try {
-      const res = await fetch(`http://localhost:8000/users/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/users/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -448,7 +449,7 @@ export const AppProvider = ({ children }: { children?: ReactNode }) => {
   const addGlobalResource = async (resource: Omit<Resource, "id">) => {
     const token = localStorage.getItem("token");
     try {
-      const res = await fetch("http://localhost:8000/api/resources", {
+      const res = await fetch(`${API_BASE_URL}/api/resources`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -469,7 +470,7 @@ export const AppProvider = ({ children }: { children?: ReactNode }) => {
   const deleteGlobalResource = async (id: string) => {
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`http://localhost:8000/api/resources/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/resources/${id}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -486,7 +487,7 @@ export const AppProvider = ({ children }: { children?: ReactNode }) => {
 
   const recordResourceView = async (url: string) => {
     try {
-      await fetch("http://localhost:8000/api/resources/record-view", {
+      await fetch(`${API_BASE_URL}/api/resources/record-view`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url }),

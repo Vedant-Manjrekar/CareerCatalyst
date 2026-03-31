@@ -11,6 +11,7 @@ import {
   EyeOff,
 } from "lucide-react";
 import { useApp } from "../context/AppContext";
+import { API_BASE_URL } from "../apiConfig";
 
 export const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -35,7 +36,7 @@ export const Login: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const res = await fetch("http://localhost:8000/api/auth/login", {
+      const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),

@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../apiConfig";
 import {
   ArrowLeft,
   BookOpen,
@@ -42,7 +43,7 @@ export const SavedCareer: React.FC = () => {
   const getSavedCareers = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch("http://localhost:8000/api/career/my-saved", {
+      const res = await fetch(`${API_BASE_URL}/api/career/my-saved`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
@@ -70,7 +71,7 @@ export const SavedCareer: React.FC = () => {
   const saveCareer = async () => {
     const token = localStorage.getItem("token");
     try {
-      await fetch("http://localhost:8000/api/career/save", {
+      await fetch(`${API_BASE_URL}/api/career/save`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -88,7 +89,7 @@ export const SavedCareer: React.FC = () => {
     const token = localStorage.getItem("token");
     try {
       const response = await fetch(
-        `http://localhost:8000/api/career/remove/${activeCareer._id}`,
+        `${API_BASE_URL}/api/career/remove/${activeCareer._id}`,
         {
           method: "DELETE",
           headers: {

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useApp } from "../context/AppContext";
+import { API_BASE_URL } from "../apiConfig";
 import {
   Users,
   BookOpen,
@@ -70,7 +71,7 @@ export const AdminPanel: React.FC = () => {
   const getAllSavedCareers = async () => {
     const token = localStorage.getItem("token");
 
-    const res = await fetch("http://localhost:8000/api/career/all-saved", {
+    const res = await fetch(`${API_BASE_URL}/api/career/all-saved`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { useApp } from "../context/AppContext";
+import { API_BASE_URL } from "../apiConfig";
 import { Bookmark, Award, Trash2, ArrowRight, ArrowLeft } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 
 export const SavedCareers: React.FC = () => {
   const { userProfile } = useApp();
-  const [careerData, setCareerData] = useState();
+  const [careerData, setCareerData] = useState<any[]>([]);
   const navigate = useNavigate();
 
   const getSavedCareers = async () => {
     const token = localStorage.getItem("token");
 
-    const res = await fetch("http://localhost:8000/api/career/my-saved", {
+    const res = await fetch(`${API_BASE_URL}/api/career/my-saved`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -36,7 +37,7 @@ export const SavedCareers: React.FC = () => {
     const token = localStorage.getItem("token");
     try {
       const response = await fetch(
-        `http://localhost:8000/api/career/remove/${id}`,
+        `${API_BASE_URL}/api/career/remove/${id}`,
         {
           method: "DELETE",
           headers: {
@@ -71,7 +72,7 @@ export const SavedCareers: React.FC = () => {
         </h1>
       </div>
 
-      {careerData?.length === 0 ? (
+      {!careerData || careerData.length === 0 ? (
         <div className='text-center py-20 bg-white dark:bg-slate-900 rounded-2xl border border-dashed border-slate-300 dark:border-slate-700 transition-colors duration-300'>
           <div className='w-20 h-20 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-6'>
             <Award className='text-slate-300 dark:text-slate-600' size={40} />
@@ -92,7 +93,7 @@ export const SavedCareers: React.FC = () => {
         </div>
       ) : (
         <div className='grid md:grid-cols-2 gap-6'>
-          {careerData?.map((career) => (
+          {careerData?.map((career: any) => (
             <div
               key={career.id}
               className='bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm hover:shadow-md transition-all group relative'

@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useLocation, useParams, useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../apiConfig";
 import {
   ArrowLeft,
   BookOpen,
@@ -66,7 +67,7 @@ export const CareerDetails: React.FC = () => {
       urls.forEach(async (url) => {
         setValidationStatuses(prev => ({ ...prev, [url]: 'checking' }));
         try {
-          const res = await fetch("http://localhost:8000/api/resources/validate-link", {
+          const res = await fetch(`${API_BASE_URL}/api/resources/validate-link`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ url })
@@ -127,7 +128,7 @@ export const CareerDetails: React.FC = () => {
   const handleSaveToggle = async () => {
     const token = localStorage.getItem("token");
 
-    await fetch("http://localhost:8000/api/career/save", {
+    await fetch(`${API_BASE_URL}/api/career/save`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

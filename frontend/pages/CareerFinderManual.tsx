@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../apiConfig";
 import { ArrowRight, Loader2, X, Plus, Search } from "lucide-react";
 import { useApp } from "../context/AppContext";
 import { recommendCareers } from "../services/geminiService";
@@ -119,7 +120,7 @@ export const CareerFinderManual: React.FC = () => {
     setIsLoading(true);
     try {
       const user = JSON.parse(localStorage.getItem("user"));
-      const res = await fetch(`http://localhost:8000/users/${user._id}`, {
+      const res = await fetch(`${API_BASE_URL}/users/${user._id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useApp } from "../context/AppContext";
+import { API_BASE_URL } from "../apiConfig";
 import { Bookmark, Award, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -13,7 +14,7 @@ export const Profile: React.FC = () => {
   const getSavedCareers = async () => {
     const token = localStorage.getItem("token");
 
-    const res = await fetch("http://localhost:8000/api/career/my-saved", {
+    const res = await fetch(`${API_BASE_URL}/api/career/my-saved`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -25,7 +26,7 @@ export const Profile: React.FC = () => {
 
   const fetchUser = async () => {
     const user = JSON.parse(localStorage.getItem("user"));
-    const res = await fetch(`http://localhost:8000/user/${user._id}`);
+    const res = await fetch(`${API_BASE_URL}/user/${user._id}`);
     const data = await res.json();
 
     setUserData(data.data);
@@ -63,7 +64,7 @@ export const Profile: React.FC = () => {
             My Skills
           </div>
           <div className='text-3xl font-bold text-slate-900 dark:text-white'>
-            {userData?.skills?.length}
+            {(userData as any)?.skills?.length || 0}
           </div>
         </div>
         <div className='bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm transition-colors duration-300'>
@@ -71,7 +72,7 @@ export const Profile: React.FC = () => {
             Saved Paths
           </div>
           <div className='text-3xl font-bold text-slate-900 dark:text-white'>
-            {careerData?.length}
+            {careerData?.length || 0}
           </div>
         </div>
         <div className='bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm transition-colors duration-300'>
@@ -99,10 +100,10 @@ export const Profile: React.FC = () => {
             <p className='text-slate-600 dark:text-slate-400 mb-6'>
               You have{" "}
               <span className='font-semibold text-slate-900 dark:text-white'>
-                {careerData?.length}
+                {careerData?.length || 0}
               </span>{" "}
               saved career path
-              {careerData?.length !== 1 ? "s" : ""}. Review your roadmaps and
+              {(careerData?.length || 0) !== 1 ? "s" : ""}. Review your roadmaps and
               track your progress.
             </p>
           </div>

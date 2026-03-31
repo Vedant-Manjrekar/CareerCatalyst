@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../apiConfig";
 import {
   Upload,
   FileText,
@@ -63,7 +64,7 @@ export const CareerFinderResume: React.FC = () => {
     setIsLoading(true);
     try {
       const user = JSON.parse(localStorage.getItem("user"));
-      const res = await fetch(`http://localhost:8000/users/${user._id}`, {
+      const res = await fetch(`${API_BASE_URL}/users/${user._id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
