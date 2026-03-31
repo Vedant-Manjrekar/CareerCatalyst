@@ -45,6 +45,10 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: true,
   },
+  lastActive: {
+    type: Date,
+    default: Date.now,
+  },
   savedResources: [{
     title: { type: String },
     url: { type: String },

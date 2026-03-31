@@ -34,6 +34,18 @@ router.post("/validate-link", async (req, res) => {
   }
 });
 
+// Record a resource view
+router.post("/record-view", async (req, res) => {
+  try {
+    const { url } = req.body;
+    if (!url) return res.status(400).json({ success: false });
+    await Resource.findOneAndUpdate({ url }, { $inc: { views: 1 } });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 // Get all resources
 router.get("/", async (req, res) => {
   try {
