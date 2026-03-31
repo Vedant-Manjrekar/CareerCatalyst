@@ -215,7 +215,7 @@ export const Layout = ({ children }: LayoutProps) => {
       <footer className='bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-white/5 py-8 transition-colors duration-300'>
         <div className='max-w-7xl mx-auto px-4 text-center text-slate-500 dark:text-slate-500 text-sm'>
           <p>
-            © {new Date().getFullYear()} Career Catalyst. Powered by Gemini.
+            © {new Date().getFullYear()} Career Catalyst. Made with ❤️ by Vedant Manjrekar.
           </p>
         </div>
       </footer>
