@@ -14,6 +14,7 @@ exports.signup = async (req, res, next) => {
       skillCount,
       savedPathCount,
       skills,
+      designation,
     } = req.body;
 
     // Check if user already exists
@@ -33,6 +34,7 @@ exports.signup = async (req, res, next) => {
       savedPathCount,
       avatar_no,
       skills,
+      designation,
       isApproved: role === "admin" ? false : true,
     });
 
@@ -75,6 +77,7 @@ exports.login = async (req, res) => {
         email: user.email,
         avatar_no: user.avatar_no,
         role: user.role,
+        designation: user.designation,
         isApproved: user.isApproved,
       },
     });

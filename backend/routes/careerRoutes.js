@@ -1,6 +1,8 @@
 const express = require("express");
 const SavedCareer = require("../models/SavedCareer");
+const User = require("../models/User");
 const auth = require("../middleware/auth"); // JWT middleware
+const { updateUserStats } = require("../utils/stats");
 const router = express.Router();
 
 router.post("/save", auth, async (req, res) => {
@@ -42,6 +44,9 @@ router.post("/save", auth, async (req, res) => {
       },
       { upsert: true, new: true, runValidators: true }
     );
+
+    await User.findByIdAndUpdate(req.user, { lastActive: Date.now() });
+    await updateUserStats(req.user);
 
     res.json({ success: true, saved });
   } catch (err) {
@@ -91,6 +96,9 @@ router.delete("/remove/:id", auth, async (req, res) => {
         message: "Career path not found or you are not authorized to delete it",
       });
     }
+
+    await User.findByIdAndUpdate(req.user, { lastActive: Date.now() });
+    await updateUserStats(req.user);
 
     res.json({
       success: true,

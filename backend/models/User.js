@@ -23,9 +23,17 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  designation: {
+    type: String,
+    required: true,
+  },
   avatar_no: {
     type: String,
     required: true,
+  },
+  location: {
+    type: String,
+    default: "",
   },
   skills: {
     type: [String],

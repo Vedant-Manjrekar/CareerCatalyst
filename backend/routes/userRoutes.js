@@ -1,7 +1,10 @@
 const express = require("express");
 const User = require("../models/User");
+const SavedCareer = require("../models/SavedCareer");
 const auth = require("../middleware/auth");
+const { updateUserStats } = require("../utils/stats");
 const router = express.Router();
+router.use(express.json());
 
 // Get current user profile
 router.get("/profile", auth, async (req, res) => {
@@ -14,16 +17,35 @@ router.get("/profile", auth, async (req, res) => {
   }
 });
 
+// Update user profile (name, avatar, designation)
+router.put("/profile", auth, async (req, res) => {
+  try {
+    const { name, avatar_no, designation, location } = req.body;
+    const user = await User.findByIdAndUpdate(
+      req.user,
+      { name, avatar_no, designation, location, lastActive: Date.now() },
+      { new: true }
+    ).select("-password");
+    res.json({ success: true, data: user });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 // Update user skills
 router.put("/skills", auth, async (req, res) => {
   try {
     const { skills } = req.body;
     const user = await User.findByIdAndUpdate(
       req.user,
-      { skills, skillCount: skills.length },
+      { skills, lastActive: Date.now() },
       { new: true }
     ).select("-password");
-    res.json({ success: true, data: user });
+    
+    await updateUserStats(req.user);
+    const updatedUser = await User.findById(req.user).select("-password");
+    
+    res.json({ success: true, data: updatedUser });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
@@ -76,7 +98,10 @@ router.post("/resources/save", auth, async (req, res) => {
     user.savedResources.push({ title, url, type, duration });
     
     console.log("Saving user...");
+    user.lastActive = Date.now();
     await user.save();
+    
+    await updateUserStats(req.user);
     
     console.log("Resource saved successfully");
     res.json({ success: true, data: user.savedResources });
@@ -99,7 +124,10 @@ router.delete("/resources/remove", auth, async (req, res) => {
     }
     
     user.savedResources = user.savedResources.filter(r => r.url !== url);
+    user.lastActive = Date.now();
     await user.save();
+    
+    await updateUserStats(req.user);
     
     res.json({ success: true, data: user.savedResources });
   } catch (err) {
