@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { Mail, Lock, User, UserPlus, ArrowRight, Eye, EyeOff } from "lucide-react";
+import { Mail, Lock, User, UserPlus, ArrowRight, Eye, EyeOff, Briefcase } from "lucide-react";
 import { useApp } from "../context/AppContext";
 import { API_BASE_URL } from "../apiConfig";
 
@@ -10,13 +10,23 @@ export const Signup: React.FC = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [designation, setDesignation] = useState("Student");
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const randomSeed = Math.random().toString(36).substring(7);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!name || !email || !password) return;
+    if (!name || !email || !password || !confirmPassword || !designation) {
+      alert("All fields are required");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      alert("Passwords do not match");
+      return;
+    }
 
     setIsLoading(true);
 
@@ -28,6 +38,7 @@ export const Signup: React.FC = () => {
           name,
           email,
           password,
+          designation,
           role: email.toLowerCase().includes("admin") ? "admin" : "user",
           joining_date: new Date(),
           skills: [],
@@ -144,6 +155,51 @@ export const Signup: React.FC = () => {
                 >
                   {showPassword ? <EyeOff className='h-5 w-5' /> : <Eye className='h-5 w-5' />}
                 </button>
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor='confirm-password' className='sr-only'>
+                Confirm Password
+              </label>
+              <div className='relative'>
+                <div className='absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10'>
+                  <Lock className='h-5 w-5 text-slate-400' />
+                </div>
+                <input
+                  id='confirm-password'
+                  name='confirmPassword'
+                  type={showPassword ? 'text' : 'password'}
+                  autoComplete='new-password'
+                  required
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className='appearance-none relative block w-full pl-12 pr-10 px-3 py-3 border border-slate-300 dark:border-slate-700 placeholder-slate-500 text-slate-900 dark:text-white dark:bg-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm transition-colors'
+                  placeholder='Confirm Password'
+                />
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor='designation' className='sr-only'>
+                Designation
+              </label>
+              <div className='relative'>
+                <div className='absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10'>
+                  <Briefcase className='h-5 w-5 text-slate-400' />
+                </div>
+                <select
+                  id='designation'
+                  name='designation'
+                  required
+                  value={designation}
+                  onChange={(e) => setDesignation(e.target.value)}
+                  className='appearance-none relative block w-full pl-12 px-3 py-3 border border-slate-300 dark:border-slate-700 placeholder-slate-500 text-slate-900 dark:text-white dark:bg-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm transition-colors'
+                >
+                  <option value="Student">Student</option>
+                  <option value="Working Professional">Working Professional</option>
+                  <option value="Other">Other</option>
+                </select>
               </div>
             </div>
           </div>

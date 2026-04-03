@@ -28,11 +28,11 @@ export const Layout = ({ children }: LayoutProps) => {
 
   const navItems = [
     { name: "Home", path: "/", icon: <LayoutDashboard size={18} /> },
-    { name: "Finder", path: "/finder", icon: <Compass size={18} /> },
-    { name: "Assistant", path: "/chat", icon: <MessageSquare size={18} /> },
   ];
 
   if (isAuthenticated) {
+    navItems.push({ name: "Finder", path: "/finder", icon: <Compass size={18} /> });
+    navItems.push({ name: "Assistant", path: "/chat", icon: <MessageSquare size={18} /> });
     navItems.push({
       name: "Saved",
       path: "/saved-careers",

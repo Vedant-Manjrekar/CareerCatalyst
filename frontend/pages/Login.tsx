@@ -250,16 +250,6 @@ export const Login: React.FC = () => {
                 Remember me
               </label>
             </div>
-
-            <div className='text-sm'>
-              <button
-                type='button'
-                onClick={() => setIsForgotPassword(true)}
-                className='font-medium text-brand-600 hover:text-brand-500 dark:text-brand-400 dark:hover:text-brand-300'
-              >
-                Forgot password?
-              </button>
-            </div>
           </div>
 
           <div>
@@ -268,10 +258,20 @@ export const Login: React.FC = () => {
               disabled={isLoading}
               className='group relative w-full flex justify-center py-3 px-4 text-sm font-medium rounded-xl text-white bg-brand-600 hover:bg-brand-700 disabled:opacity-70 transition-all shadow-lg shadow-brand-500/30'
             >
-              {isLoading ? "Loging in..." : "Log in"}
+              {isLoading ? "Logging in..." : "Log in"}
               {!isLoading && (
                 <ArrowRight className='ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform' />
               )}
+            </button>
+          </div>
+
+          <div className='text-center'>
+            <button
+              type='button'
+              onClick={() => setIsForgotPassword(true)}
+              className='text-sm font-medium text-brand-600 hover:text-brand-500 dark:text-brand-400 Transition-colors'
+            >
+              Forgot your password?
             </button>
           </div>
         </form>

@@ -44,6 +44,7 @@ const defaultProfile: UserProfile = {
   mySkills: [],
   completedResources: [],
   savedResources: [],
+  designation: "Guest",
 };
 
 const mockUsers: AdminUser[] = [];
@@ -125,6 +126,7 @@ export const AppProvider = ({ children }: { children?: ReactNode }) => {
             savedResources: userData.data.savedResources || [],
             isApproved: userData.data.isApproved,
             role: userData.data.role,
+            designation: userData.data.designation,
           };
 
           const isReallyAdmin = profile.role === "admin" && profile.isApproved;
@@ -171,6 +173,7 @@ export const AppProvider = ({ children }: { children?: ReactNode }) => {
                   isApproved: u.isApproved,
                   lastActive: u.lastActive,
                   avatar_no: u.avatar_no || u.id || u.email,
+                  designation: u.designation,
                 })),
               );
             }

@@ -1,8 +1,10 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Sparkles, Target, Award, CheckCircle } from "lucide-react";
+import { useApp } from "../context/AppContext";
 
 export const Home: React.FC = () => {
+  const { isAuthenticated } = useApp();
   return (
     <div className='relative overflow-hidden py-16 lg:py-24'>
       {/* Background Decor */}
@@ -89,17 +91,17 @@ export const Home: React.FC = () => {
 
         <div className='flex flex-col sm:flex-row gap-4 justify-center items-center'>
           <Link
-            to='/finder'
+            to={isAuthenticated ? '/finder' : '/signup'}
             className='px-8 py-4 bg-brand-600 hover:bg-brand-700 dark:bg-moon-600 dark:hover:bg-moon-500 text-white rounded-lg font-semibold text-lg transition-all shadow-lg shadow-brand-500/30 dark:shadow-moon-500/40 flex items-center'
           >
-            Get Started Now
+            {isAuthenticated ? 'Go to Finder' : 'Get Started Now'}
             <ArrowRight className='ml-2' size={20} />
           </Link>
           <Link
-            to='/chat'
+            to={isAuthenticated ? '/chat' : '/login'}
             className='px-8 py-4 bg-white dark:bg-transparent hover:bg-slate-50 dark:hover:bg-white/5 text-slate-700 dark:text-moon-100 border border-slate-300 dark:border-moon-500/70 hover:border-brand-300 dark:hover:border-moon-400 rounded-lg font-semibold text-lg transition-all'
           >
-            Ask AI Assistant
+            {isAuthenticated ? 'Ask AI Assistant' : 'Explore as Guest'}
           </Link>
         </div>
 

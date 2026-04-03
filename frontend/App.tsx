@@ -2,6 +2,7 @@ import React from "react";
 import { HashRouter as Router, Routes, Route } from "react-router-dom";
 import { AppProvider } from "./context/AppContext";
 import { Layout } from "./components/Layout";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 import { Home } from "./pages/Home";
 import { CareerFinder } from "./pages/CareerFinder";
 import { CareerFinderManual } from "./pages/CareerFinderManual";
@@ -23,19 +24,21 @@ function App() {
         <Layout>
           <Routes>
             <Route path='/' element={<Home />} />
-            <Route path='/finder' element={<CareerFinder />} />
-            <Route path='/finder/manual' element={<CareerFinderManual />} />
-            <Route path='/finder/resume' element={<CareerFinderResume />} />
-            <Route path='/finder/direct' element={<CareerFinderDirect />} />
-            <Route path='/finder/results' element={<CareerResults />} />
-            <Route path='/career/:id' element={<CareerDetails />} />
-            <Route path='/saved-career/:id' element={<CareerDetails />} />
-            <Route path='/profile' element={<Profile />} />
-            <Route path='/saved-careers' element={<SavedCareers />} />
-            <Route path='/chat' element={<Chatbot />} />
             <Route path='/login' element={<Login />} />
             <Route path='/signup' element={<Signup />} />
-            <Route path='/admin' element={<AdminPanel />} />
+            
+            {/* Protected Routes */}
+            <Route path='/finder' element={<ProtectedRoute><CareerFinder /></ProtectedRoute>} />
+            <Route path='/finder/manual' element={<ProtectedRoute><CareerFinderManual /></ProtectedRoute>} />
+            <Route path='/finder/resume' element={<ProtectedRoute><CareerFinderResume /></ProtectedRoute>} />
+            <Route path='/finder/direct' element={<ProtectedRoute><CareerFinderDirect /></ProtectedRoute>} />
+            <Route path='/finder/results' element={<ProtectedRoute><CareerResults /></ProtectedRoute>} />
+            <Route path='/career/:id' element={<ProtectedRoute><CareerDetails /></ProtectedRoute>} />
+            <Route path='/saved-career/:id' element={<ProtectedRoute><CareerDetails /></ProtectedRoute>} />
+            <Route path='/profile' element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+            <Route path='/saved-careers' element={<ProtectedRoute><SavedCareers /></ProtectedRoute>} />
+            <Route path='/chat' element={<ProtectedRoute><Chatbot /></ProtectedRoute>} />
+            <Route path='/admin' element={<ProtectedRoute adminOnly={true}><AdminPanel /></ProtectedRoute>} />
           </Routes>
         </Layout>
       </Router>

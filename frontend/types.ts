@@ -41,6 +41,7 @@ export interface UserProfile {
   savedResources?: Resource[];
   isApproved?: boolean;
   role?: "admin" | "user";
+  designation?: string;
 }
 
 export interface AdminUser {
@@ -55,6 +56,7 @@ export interface AdminUser {
   isApproved: boolean;
   lastActive?: string;
   avatar_no?: string;
+  designation?: string;
 }
 
 export enum AppStatus {
