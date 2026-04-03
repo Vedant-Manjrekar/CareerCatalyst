@@ -27,6 +27,8 @@ interface AppContextType {
   signup: (name: string, email: string) => void;
   logout: () => void;
   approveUser: (id: string) => Promise<void>;
+  isInitialLoading: boolean;
+  setIsInitialLoading: (loading: boolean) => void;
   // Admin methods
   allUsers: AdminUser[];
   deleteUser: (id: string) => void;
@@ -58,6 +60,7 @@ export const AppProvider = ({ children }: { children?: ReactNode }) => {
     const saved = localStorage.getItem("career_catalyst_profile");
     return saved ? JSON.parse(saved) : defaultProfile;
   });
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
 
   const [searchResults, setSearchResultsState] = useState<CareerPath[]>(() => {
     const saved = sessionStorage.getItem("career_catalyst_search_results");
@@ -108,7 +111,10 @@ export const AppProvider = ({ children }: { children?: ReactNode }) => {
   useEffect(() => {
     const fetchData = async () => {
       const token = localStorage.getItem("token");
-      if (!token) return;
+      if (!token) {
+        setIsInitialLoading(false);
+        return;
+      }
 
       try {
         // Fetch User Profile
@@ -188,6 +194,8 @@ export const AppProvider = ({ children }: { children?: ReactNode }) => {
         }
       } catch (err) {
         console.error("Initial fetch failed:", err);
+      } finally {
+        setIsInitialLoading(false);
       }
     };
 
@@ -531,6 +539,8 @@ export const AppProvider = ({ children }: { children?: ReactNode }) => {
         addGlobalResource,
         deleteGlobalResource,
         recordResourceView,
+        isInitialLoading,
+        setIsInitialLoading,
       }}
     >
       {children}

@@ -4,6 +4,7 @@ import { API_BASE_URL } from "../apiConfig";
 import { Bookmark, Award, ArrowRight, Mail, Briefcase, ChevronDown, ChevronUp, ShieldCheck, Sparkles, RefreshCw, Settings, X, Trash2, Plus, Check, Image as ImageIcon, Share2, Star, TrendingUp, Layers, MapPin, Github, Linkedin, Globe, ExternalLink, FileText } from "lucide-react";
 import { Link } from "react-router-dom";
 import { CareerPath } from "../types";
+import { Loading } from "../components/Loading";
 
 
 export const Profile: React.FC = () => {
@@ -169,6 +170,10 @@ export const Profile: React.FC = () => {
     const diff = Date.now() - new Date(lastActiveDate).getTime();
     return diff < 7 * 24 * 60 * 60 * 1000; // 7 days
   };
+
+  if (!userData) {
+    return <Loading variant="fullscreen" message="Fetching your career profile..." />;
+  }
 
   return (
     <div className='max-w-5xl mx-auto py-10 px-4 relative'>

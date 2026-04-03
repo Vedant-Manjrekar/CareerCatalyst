@@ -3,23 +3,32 @@ import { useApp } from "../context/AppContext";
 import { API_BASE_URL } from "../apiConfig";
 import { Bookmark, Award, Trash2, ArrowRight, ArrowLeft } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import { Loading } from "../components/Loading";
 
 export const SavedCareers: React.FC = () => {
   const { userProfile } = useApp();
   const [careerData, setCareerData] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
   const getSavedCareers = async () => {
     const token = localStorage.getItem("token");
 
-    const res = await fetch(`${API_BASE_URL}/api/career/my-saved`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    setIsLoading(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/career/my-saved`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-    const data = await res.json();
-    setCareerData(data.data);
+      const data = await res.json();
+      setCareerData(data.data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   console.log(careerData);
@@ -72,7 +81,11 @@ export const SavedCareers: React.FC = () => {
         </h1>
       </div>
 
-      {!careerData || careerData.length === 0 ? (
+      {isLoading ? (
+        <div className="py-20 flex justify-center">
+          <Loading variant="overlay" message="Retrieving your saved paths..." />
+        </div>
+      ) : !careerData || careerData.length === 0 ? (
         <div className='text-center py-20 bg-white dark:bg-slate-900 rounded-2xl border border-dashed border-slate-300 dark:border-slate-700 transition-colors duration-300'>
           <div className='w-20 h-20 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-6'>
             <Award className='text-slate-300 dark:text-slate-600' size={40} />

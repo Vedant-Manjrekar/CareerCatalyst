@@ -15,6 +15,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { useApp } from "../context/AppContext";
+import { Loading } from "./Loading";
 
 interface LayoutProps {
   children?: React.ReactNode;
@@ -22,9 +23,13 @@ interface LayoutProps {
 
 export const Layout = ({ children }: LayoutProps) => {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
-  const { theme, toggleTheme, isAuthenticated, isAdmin, logout } = useApp();
+  const { theme, toggleTheme, isAuthenticated, isAdmin, logout, isInitialLoading } = useApp();
   const location = useLocation();
   const navigate = useNavigate();
+
+  if (isInitialLoading) {
+    return <Loading variant="fullscreen" message="Synchronizing Profile..." />;
+  }
 
   const navItems = [
     { name: "Home", path: "/", icon: <LayoutDashboard size={18} /> },

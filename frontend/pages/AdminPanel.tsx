@@ -21,7 +21,8 @@ import {
   Award,
   Mail,
 } from "lucide-react";
-import { Navigate } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
+import { Loading } from "../components/Loading";
 
 export const AdminPanel: React.FC = () => {
   const {
@@ -45,6 +46,7 @@ export const AdminPanel: React.FC = () => {
   const [careerData, setCareerData] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   // User Details Modal State
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
@@ -69,18 +71,21 @@ export const AdminPanel: React.FC = () => {
   });
 
   const getAllSavedCareers = async () => {
-    const token = localStorage.getItem("token");
-
-    const res = await fetch(`${API_BASE_URL}/api/career/all-saved`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    const data = await res.json();
-    setCareerData(data.data);
-
-    console.log(data.data);
+    setIsLoading(true);
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`${API_BASE_URL}/api/career/all-saved`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await res.json();
+      setCareerData(data.data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -131,6 +136,10 @@ export const AdminPanel: React.FC = () => {
     setIsModalOpen(false);
     setNewResource({ title: "", url: "", type: "Article", duration: "" });
   };
+
+  if (isLoading) {
+    return <Loading variant="fullscreen" message="Accessing Administrative Control..." />;
+  }
 
   return (
     <div className='max-w-7xl mx-auto py-8'>
