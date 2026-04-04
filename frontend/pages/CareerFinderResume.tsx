@@ -53,7 +53,7 @@ export const CareerFinderResume: React.FC = () => {
     } catch (error) {
       console.error(error);
       alert(
-        "Failed to analyze resume. Please ensure the file is a readable PDF or Image."
+        "Failed to analyze resume. Please ensure the file is a readable PDF or Image.",
       );
       setIsLoading(false);
     }
@@ -88,7 +88,7 @@ export const CareerFinderResume: React.FC = () => {
 
   const removeSkill = (skillToRemove: string) => {
     setExtractedSkills(
-      extractedSkills.filter((skill) => skill !== skillToRemove)
+      extractedSkills.filter((skill) => skill !== skillToRemove),
     );
   };
 

@@ -11,6 +11,7 @@ export interface Resource {
   tags?: string[];
   id?: string;
   views?: number;
+  savedAt?: string;
 }
 
 export interface CareerPath {
@@ -33,15 +34,20 @@ export interface RoadmapStep {
 }
 
 export interface UserProfile {
+  _id?: string;
   name: string;
   email?: string;
-  savedCareers: CareerPath[];
-  mySkills: string[];
-  completedResources: string[];
-  savedResources?: Resource[];
-  isApproved?: boolean;
   role?: "admin" | "user";
+  isApproved?: boolean;
   designation?: string;
+  location?: string;
+  avatar_no?: string;
+  lastActive?: string;
+  skills: string[]; // Matches backend "skills"
+  mySkills?: string[]; // Legacy compatibility if needed
+  savedCareers: CareerPath[];
+  savedResources: Resource[];
+  completedResources: string[];
 }
 
 export interface AdminUser {

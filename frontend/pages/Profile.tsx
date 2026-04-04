@@ -3,7 +3,7 @@ import { useApp } from "../context/AppContext";
 import { API_BASE_URL } from "../apiConfig";
 import { Bookmark, Award, ArrowRight, Mail, Briefcase, ChevronDown, ChevronUp, ShieldCheck, Sparkles, RefreshCw, Settings, X, Trash2, Plus, Check, Image as ImageIcon, Share2, Star, TrendingUp, Layers, MapPin, Github, Linkedin, Globe, ExternalLink, FileText } from "lucide-react";
 import { Link } from "react-router-dom";
-import { CareerPath } from "../types";
+import { CareerPath, UserProfile } from "../types";
 import { Loading } from "../components/Loading";
 
 
@@ -13,7 +13,7 @@ export const Profile: React.FC = () => {
   const [expandedPath, setExpandedPath] = useState<string | null>(null);
   const userName = localStorage.getItem("user_name");
   const avatar_seed = localStorage.getItem("avatar_no");
-  const [userData, setUserData] = useState<any>(null);
+  const [userData, setUserData] = useState<UserProfile | null>(null);
   
   // Edit States
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
@@ -87,8 +87,9 @@ export const Profile: React.FC = () => {
         alert(`Failed to update profile: ${data.message || 'Unknown error'}`);
       }
     } catch (err: any) {
-      console.error("Network/Fetch error:", err);
-      alert(`Failed to update profile: ${err.message}`);
+      const error = err as Error;
+      console.error("Network/Fetch error:", error);
+      alert(`Failed to update profile: ${error.message}`);
     } finally {
       setIsUpdating(false);
     }
@@ -146,10 +147,13 @@ export const Profile: React.FC = () => {
         body: JSON.stringify({ url }),
       });
       if (res.ok) {
-        setUserData((prev: any) => ({
-          ...prev,
-          savedResources: prev.savedResources.filter((r: any) => r.url !== url)
-        }));
+        setUserData((prev: UserProfile | null) => {
+          if (!prev) return null;
+          return {
+            ...prev,
+            savedResources: (prev.savedResources || []).filter((r: any) => r.url !== url)
+          };
+        });
       }
     } catch (err) {
       alert("Failed to remove resource");

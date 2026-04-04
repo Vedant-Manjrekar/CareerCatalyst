@@ -43,6 +43,7 @@ const defaultProfile: UserProfile = {
   name: "Guest User",
   email: "guest@example.com",
   savedCareers: [],
+  skills: [],
   mySkills: [],
   completedResources: [],
   savedResources: [],
@@ -126,6 +127,7 @@ export const AppProvider = ({ children }: { children?: ReactNode }) => {
           const profile: UserProfile = {
             name: userData.data.name,
             email: userData.data.email,
+            skills: userData.data.skills || [],
             mySkills: userData.data.skills || [],
             savedCareers: [],
             completedResources: userProfile.completedResources,
@@ -133,6 +135,10 @@ export const AppProvider = ({ children }: { children?: ReactNode }) => {
             isApproved: userData.data.isApproved,
             role: userData.data.role,
             designation: userData.data.designation,
+            avatar_no: userData.data.avatar_no,
+            location: userData.data.location,
+            lastActive: userData.data.lastActive,
+            _id: userData.data._id,
           };
 
           const isReallyAdmin = profile.role === "admin" && profile.isApproved;
@@ -208,9 +214,10 @@ export const AppProvider = ({ children }: { children?: ReactNode }) => {
         .then((data) => {
           if (data.success) setGlobalResources(data.data);
         })
-        .catch(console.error);
+        .catch(console.error)
+        .finally(() => setIsInitialLoading(false));
     }
-  }, [isAuthenticated, isAdmin]);
+  }, [isAuthenticated]);
 
   const toggleTheme = () => {
     setTheme((prev) => (prev === "light" ? "dark" : "light"));
